@@ -9,7 +9,7 @@ public class Main {
         Employee emp = Employee.getById(1);
         emp.setFirstName("James");
         emp.setLastName("Bond");
-        emp.setSalary(BigDecimal.valueOf(3000));
+        emp.setSalary(BigDecimal.valueOf(4123));
         emp.setEmploymentDate("2017-07-07");
         emp.setHolidays("2019-07-14", "2019-07-28");
 

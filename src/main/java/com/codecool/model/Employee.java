@@ -4,10 +4,22 @@ import com.codecool.dao.FakeCSV;
 import com.codecool.dao.FakeDB;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 public class Employee {
+
+    private static BigDecimal ONE_HUNDRED = new BigDecimal(100);
+    private static BigDecimal RETIREMENT_CONTRIBUTION_RATE = new BigDecimal("9.76").divide(ONE_HUNDRED);
+    private static BigDecimal PENSION_CONTRIBUTION_RATE = new BigDecimal("1.5").divide(ONE_HUNDRED);
+    private static BigDecimal SICK_LEAVE_CONTRIBUTION_RATE = new BigDecimal("2.45").divide(ONE_HUNDRED);
+    private static BigDecimal HEALTH_INSURANCE_CONTRIBUTION_RATE = new BigDecimal("9").divide(ONE_HUNDRED);
+    private static BigDecimal HEALTH_INSURANCE_TAX_DISCOUNT = new BigDecimal("7.75").divide(ONE_HUNDRED);
+    private static BigDecimal TAX_RATE = new BigDecimal("18").divide(ONE_HUNDRED);
+    private static BigDecimal TAX_DISCOUNT = new BigDecimal("46.33");
+    private static BigDecimal INCOME_COSTS = new BigDecimal("111.25");
+
 
     private String firstName;
     private String lastName;
@@ -76,8 +88,57 @@ public class Employee {
                 '}';
     }
 
+    private BigDecimal getRetirementContribution(){
+        return this.salary.multiply(RETIREMENT_CONTRIBUTION_RATE);
+    }
+
+    private BigDecimal getPensionContribution(){
+        return this.salary.multiply(PENSION_CONTRIBUTION_RATE);
+    }
+
+    private BigDecimal getSickLeaveContribution(){
+        return this.salary.multiply(SICK_LEAVE_CONTRIBUTION_RATE);
+    }
+
+    private BigDecimal getContributionsTotal(){
+        return getRetirementContribution()
+                .add(getPensionContribution())
+                .add(getSickLeaveContribution());
+    }
+
+    private BigDecimal getHealthInsuranceBase(){
+        return this.salary.subtract(getContributionsTotal());
+    }
+
+    private BigDecimal getHealthInsurance(){
+        return getHealthInsuranceBase().multiply(HEALTH_INSURANCE_CONTRIBUTION_RATE);
+    }
+
+    private BigDecimal getHealthInsuranceTaxDiscount(){
+        return getHealthInsuranceBase().multiply(HEALTH_INSURANCE_TAX_DISCOUNT);
+    }
+
+    private BigDecimal getTaxBase(){
+        return this.salary
+                .subtract(INCOME_COSTS)
+                .subtract(getContributionsTotal())
+                .setScale(0, BigDecimal.ROUND_UP);
+    }
+
+    private BigDecimal getTax(){
+        return getTaxBase()
+                .multiply(TAX_RATE)
+                .subtract(TAX_DISCOUNT)
+                .subtract(getHealthInsuranceTaxDiscount())
+                .setScale(0, BigDecimal.ROUND_UP);
+    }
+
     public BigDecimal getNetSalary(){
-        return salary.multiply(BigDecimal.valueOf(1.23));
+        return this.salary
+                .subtract(getContributionsTotal())
+                .subtract(getHealthInsurance())
+                .subtract(getTax())
+                .setScale(2, BigDecimal.ROUND_DOWN);
     }
 
     public void saveToCSV(){

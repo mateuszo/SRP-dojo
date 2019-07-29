@@ -24,6 +24,7 @@ public class Employee {
     private String firstName;
     private String lastName;
     private int age;
+    private LocalDate birthDate;
     private LocalDate employmentDate;
     private BigDecimal salary;
     private String title;
